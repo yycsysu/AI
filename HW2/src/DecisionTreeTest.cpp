@@ -24,9 +24,9 @@ int main(int argc, char** argv) {
     printf("cannot open file: testOutput.txt\n");
     exit(0);
   }
-  for (it1 = votes.begin() + 100; it1 != votes.end() - 10; it1++) {
-    vector<Vote> inputVotes(votes.begin(), it1);
+  for (it1 = votes.begin() + 10; it1 != votes.end() - 10; it1++) {
     vector<Vote> testVotes(it1, votes.end());
+    vector<Vote> inputVotes(votes.begin(), it1);
     DecisionTree * tree = makeDecisionTree(inputVotes);
     cnt = 0;
     ycnt = 0;
