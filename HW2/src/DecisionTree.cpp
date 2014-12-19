@@ -1,6 +1,4 @@
 #include "DecisionTree.h"
-#include <string>
-using namespace std;
 
 string attributs[16] = {
   "handicapped-infants",
@@ -33,6 +31,7 @@ DecisionTree * makeDecisionTree(vector<Vote> votes) {
   usedValueNum = 0;
   memset(used, false, sizeof(bool) * 16);
   DecisionTree* def = new DecisionTree();
+
   decisionTree = decisionTreeLearning(votes, used, def);
 
   return decisionTree;
@@ -49,6 +48,8 @@ DecisionTree * decisionTreeLearning(vector<Vote> votes, bool attribs[], Decision
     return majorityValue(votes);
   } else {
     int best = chooseAttribute(attribs, votes);
+    if (best == -1)
+      return majorityValue(votes);
     attribs[best] = true;
     usedValueNum++;
 
@@ -77,36 +78,50 @@ DecisionTree * decisionTreeLearning(vector<Vote> votes, bool attribs[], Decision
 int chooseAttribute(bool attribs[], vector<Vote> votes) {
   vector<Vote>::iterator it;
   double maxGain = 0;
+  double maxD = 0;
   int bestValue = -1;
   for (int i = 0; i < 16; i++) {
     if (attribs[i] == true) continue;
-    double gain = I(0.452, 0.548);
-    double all = 0;
-    double yea = 0, yr = 0, yd = 0;
-    double nay = 0, nr = 0, nd = 0;
-    double unknown = 0, ur = 0, ud = 0;
+    int all = 0, p = 0, n = 0;
+    int pi[3] = { 0, 0, 0 };
+    int ni[3] = { 0, 0, 0 };
+    double epi[3] = { 0, 0, 0 };
+    double eni[3] = { 0, 0, 0 };
+    int vCount[3] = { 0, 0, 0 };
+    //string v[3] = { "y", "n", "?" };
+
+    // p + n : all, p : d, n : r
+    all = votes.size();
     for (it = votes.begin(); it != votes.end(); it++) {
-      all++;
-      if (it->values[i] == "y") {
-        yea++;
-        if (it->className == "republican") yr++;
-        else if (it->className == "democrat") yd++;
-      } else if (it->values[i] == "n") {
-        nay++;
-        if (it->className == "republican") nr++;
-        else if (it->className == "democrat") nd++;
-      } else {
-        unknown++;
-        if (it->className == "republican") ur++;
-        else if (it->className == "democrat") ud++;
+      for (int j = 0; j < 3; j++)
+        if (it->values[i] == v[j]) {
+          vCount[j]++;
+          if (it->className == "republican") {
+            ni[j]++;
+            n++;
+          } else if (it->className == "democrat") {
+            pi[j]++;
+            p++;
+          }
+          break;
+        }
+    }
+
+    double D = 0;
+    for (int j = 0; j < 3; j++) {
+      epi[j] = p * (double)(pi[j] + ni[j]) / (p + n);
+      eni[j] = n * (double)(pi[j] + ni[j]) / (p + n);
+      D += (((pi[j] - epi[j]) * (pi[j] - epi[j])) / epi[j]
+        + ((ni[j] - eni[j]) * (ni[j] - eni[j])) / eni[j]);
+    }
+    if (D < 4.61) continue;
+
+    double gain = I(p / (p + n), n / (p + n));
+    for (int j = 0; j < 3; j++) {
+      if ((pi[j] + ni[j]) != 0) {
+        gain -= ((double)(pi[j] + ni[j]) / (p + n)) * I(((double)pi[j] / (pi[j] + ni[j])), ((double)ni[j] / (pi[j] + ni[j])));
       }
     }
-    if (yea != 0)
-      gain -= (yea / all) * I(yd / yea, yr / yea);
-    if (nay != 0)
-      gain -= (nay / all) * I(nd / nay, nr / nay);
-    if (unknown != 0)
-      gain -=(unknown / all) * I(ud / unknown, ur / unknown);
     if (bestValue == -1 || gain > maxGain) {
       maxGain = gain;
       bestValue = i;
@@ -146,18 +161,15 @@ bool checkSameClassification(vector<Vote> votes, DecisionTree * classification) 
 void readFile(FILE* fp, vector<Vote> & votes) {
   char ch;
   Vote vote;
-  string className;
-  int cnt = 0;
   while (1) {
-    className = "";
+    string className = "";
     while ((ch = fgetc(fp)) && (ch != ',')) {
       className += ch;
     }
     vote.className = className;
     int count = 0;
-   // ch = fgetc(fp);
-    while ((ch = fgetc(fp)) &&(ch != '\n') && (ch != EOF)) {
-      if (ch == 'y' || ch == 'n' || ch == '?' ) vote.values[count++] = ch;
+    while ((ch = fgetc(fp)) && (ch != '\n') && (ch != EOF)) {
+      if (ch == 'y' || ch == 'n' || ch == '?') vote.values[count++] = ch;
     }
     votes.push_back(vote);
     if (ch == EOF) break;
