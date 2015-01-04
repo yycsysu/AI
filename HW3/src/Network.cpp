@@ -34,7 +34,6 @@ void readFile(FILE *fp, vector<Example> * examles) {
 
 void Network::backPropLearning(vector<Example> * examples, vector<Example> * test) {
   int count = 0;
-  bool isWrong;
   vector<Example> * tmp = new vector<Example>(*examples);
   double lastExErr = 30;
   double lastTestErr = 30;
@@ -79,17 +78,16 @@ void Network::backPropLearning(vector<Example> * examples, vector<Example> * tes
       }
       // updata weight end
     }
- /*    
+    /*    
     exErr = this->getError(examples); 
     testErr = this->getError(test);
     cout << exErr << " " << testErr << endl;
-   // if (exErr < lastExErr && testErr > lastTestErr)
-   //   cout << "bestTime: " << count - 1 << endl;
+    if (exErr < lastExErr && testErr > lastTestErr)
+      cout << "bestTime: " << count - 1 << endl;
     lastExErr = exErr;
     lastTestErr = testErr;
-   */ 
-      isWrong = true;
-      if (!isWrong || count == this->times) return;;
+    */ 
+      if (count == this->times) return;;
   }
 }
 
@@ -128,8 +126,8 @@ double Network::testNetwork(vector<Example> * examples) {
   for (e = examples->begin(); e != examples->end(); e++) {
     if (getOutput(*e) == t(e->output)) hit++;
   }
-  //cout << "hit: " << hit << ", " <<  examples->size() << endl;
-  cout << (double)hit / examples->size() << endl;
+  cout << "hit: " << hit << ", test size:" <<  examples->size() << endl;
+  cout << "hit rate: " << (double)hit / examples->size() << endl;
   return (double)hit / examples->size();
 }
 
