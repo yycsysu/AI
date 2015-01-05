@@ -52,7 +52,7 @@ void Network::backPropLearning(vector<Example> * examples, vector<Example> * tes
       for (int l = 1; l < this->numOfLayers; l++) {
         for (int i = 0; i < this->numOfUnits[l]; i++) {
           in[l][i] = 0;
-          for (int j = 0; j < this->numOfUnits[l]; j++)
+          for (int j = 0; j < this->numOfUnits[l - 1]; j++)
             in[l][i] += weight[l - 1][j][i] * a[l - 1][j];
           a[l][i] = this->g(in[l][i]);
         }
@@ -81,12 +81,12 @@ void Network::backPropLearning(vector<Example> * examples, vector<Example> * tes
     /*    
     exErr = this->getError(examples); 
     testErr = this->getError(test);
-    cout << exErr << " " << testErr << endl;
-    if (exErr < lastExErr && testErr > lastTestErr)
-      cout << "bestTime: " << count - 1 << endl;
+    cout << count << " " << exErr << " " << testErr << endl;
+    //if (exErr < lastExErr && testErr > lastTestErr)
+    //  cout << "bestTime: " << count - 1 << endl;
     lastExErr = exErr;
     lastTestErr = testErr;
-    */ 
+    */
       if (count == this->times) return;;
   }
 }
@@ -100,7 +100,7 @@ int Network::getOutput(Example e) {
   for (int l = 1; l < this->numOfLayers; l++) {
     for (int i = 0; i < this->numOfUnits[l]; i++) {
       in[l][i] = 0;
-      for (int j = 0; j < this->numOfUnits[l]; j++)
+      for (int j = 0; j < this->numOfUnits[l - 1]; j++)
         in[l][i] += this->weight[l - 1][j][i] * a[l - 1][j];
       a[l][i] = this->g(in[l][i]);
     }
@@ -128,6 +128,7 @@ double Network::testNetwork(vector<Example> * examples) {
   }
   cout << "hit: " << hit << ", test size:" <<  examples->size() << endl;
   cout << "hit rate: " << (double)hit / examples->size() << endl;
+  //cout << (double)hit / examples->size() << endl;
   return (double)hit / examples->size();
 }
 

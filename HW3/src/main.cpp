@@ -25,15 +25,15 @@ int main(int argc, char** argv) {
   double bestHit = 0;
   //29 + 25
   //11 + 45
-  //for (int i = 8; i <= 50; i++) {
-    network = new Network(57, 250, 1.4); 
+  //for (int i =1 ; i <= 64; i++) {
+    network = new Network(25, 1000, 1.5); 
     network->backPropLearning(es, test);
     double hit = network->testNetwork(test);
-    //if (hit > bestHit) {
-    //  bestP = i;
-      bestHit = hit;
-    //}
+  //  if (hit > bestHit) {
+  //    bestP = i;
+  //    bestHit = hit;
+  //  }
   //}
-  cout << "hit: " << bestHit << endl;
+  cout << "best: " << bestP << "hit: " << bestHit << endl;
   return 0;
 }
